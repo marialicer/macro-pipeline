@@ -1,0 +1,13 @@
+# arquivos de ambiente
+.env
+.env.*
+!.env.example
+
+# cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+dist/
+*.egg-info/

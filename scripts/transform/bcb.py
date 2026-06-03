@@ -23,16 +23,7 @@ def transformar_indicador(nome_indicador: str):
     df["valor"] = (df["valor"].astype(float).round(2))
 
     # Padroniza os nomes das colunas
-    df.columns = (
-        df.columns
-        .str.normalize("NFKD")
-        .str.encode("ascii", errors="ignore")
-        .str.decode("utf-8")
-        .str.lower()
-        .str.replace(r"[\s\(\)]", "_", regex=True)
-        .str.replace("__", "_", regex=True)
-        .str.strip("_")
-    )
+    df = df.rename(columns={"data": "data_referencia"})
 
     # Define a pasta de saída
     pasta_saida = BASE_DIR / "data" / "processed"
