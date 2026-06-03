@@ -16,7 +16,7 @@ def transformar_indicador(nome_indicador: str):
     df = pd.read_json(arquivo_entrada)
 
     # Converte a coluna "data" para o tipo datetime
-    df["data"] = pd.to_datetime(df["data"])
+    df["data"] = pd.to_datetime(df["data"], dayfirst=True)
 
     # Converte a coluna "valor" para float
     # Troca vírgula por ponto antes da conversão
