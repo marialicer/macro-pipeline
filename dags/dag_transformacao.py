@@ -27,6 +27,8 @@ from scripts.transform.bcb import transformar_indicador
 # ------------------------------------------------------------------------------
 bcb_ingestao = Dataset("bcb_ingestao")
 
+# Dataset publicado ao final da transformação
+dataset_transformacao = Dataset("bcb_transformacao")
 
 # ------------------------------------------------------------------------------
 # Indicadores a serem processados
@@ -97,6 +99,13 @@ with DAG(
     def transformar_ibge(indicador: dict):
         print(f"IBGE não implementado ainda: {indicador['nome']}")
 
+    # Publica o Dataset para disparar a DAG de carga
+    @task(outlets=[dataset_transformacao])
+    def publicar_dataset():
+        print("Transformação concluída")
+
+    tarefas_finais = []
+
 
     # --------------------------------------------------------------------------
     # Geração dinâmica de tasks por indicador
@@ -110,8 +119,26 @@ with DAG(
     # evitando colisão entre as instâncias da mesma função reutilizada.
     # --------------------------------------------------------------------------
     for ind in INDICADORES:
-        branch = decidir_branch.override(task_id=f"branch_{ind['nome']}")(ind)
+        branch = decidir_branch.override(
+            task_id=f"branch_{ind['nome']}"
+        )(ind)
 
-        # Define as dependências: branch decide qual dos dois caminhos seguir
-        branch >> transformar_bcb.override(task_id=f"transformar_bcb_{ind['nome']}")(ind)
-        branch >> transformar_ibge.override(task_id=f"transformar_ibge_{ind['nome']}")(ind)
+        bcb = transformar_bcb.override(
+            task_id=f"transformar_bcb_{ind['nome']}"
+        )(ind)
+
+        ibge = transformar_ibge.override(
+            task_id=f"transformar_ibge_{ind['nome']}"
+        )(ind)
+
+        # Define as dependências
+        branch >> bcb
+        branch >> ibge
+
+        tarefas_finais.extend([bcb, ibge])
+
+    publicacao = publicar_dataset()
+
+    for tarefa in tarefas_finais:
+        tarefa >> publicacao
+    

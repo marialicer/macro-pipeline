@@ -140,3 +140,77 @@ def carregar_indicador(nome_indicador: str, unidade: str, periodicidade: str):
         # seja liberada e não fique pendurada no pool do PostgreSQL.
         cursor.close()
         conexao.close()
+
+# ==============================================================================
+# Registro de Execuções do Pipeline
+# ------------------------------------------------------------------------------
+# Insere uma linha na tabela execucoes_pipeline para auditoria e monitoramento
+# das execuções das DAGs.
+# ==============================================================================
+
+def registrar_execucao_pipeline(
+        dag_id: str,
+        indicador: str,
+        status: str,
+        registros_inseridos: int,
+        mensagem: str = None
+    ):
+        """
+        Registra uma execução do pipeline na tabela execucoes_pipeline.
+
+        Args:
+            dag_id: Nome da DAG executada.
+            indicador: Indicador processado.
+            status: Status da execução (SUCESSO, ERRO, etc.).
+            registros_inseridos: Quantidade de registros carregados.
+            mensagem: Mensagem complementar (opcional).
+        """
+
+        conexao = psycopg2.connect(
+            dbname=os.getenv("POSTGRES_PROJETO_DB"),
+            user=os.getenv("POSTGRES_PROJETO_USER"),
+            password=os.getenv("POSTGRES_PROJETO_PASSWORD"),
+            host="postgres_projeto",
+            port="5432"
+        )
+
+        cursor = conexao.cursor()
+
+        try:
+            query = """
+                INSERT INTO execucoes_pipeline (
+                    dag_id,
+                    indicador,
+                    status,
+                    registros_inseridos,
+                    mensagem
+                )
+                VALUES (%s, %s, %s, %s, %s);
+            """
+
+            cursor.execute(
+                query,
+                (
+                    dag_id,
+                    indicador,
+                    status,
+                    registros_inseridos,
+                    mensagem
+                )
+            )
+
+            conexao.commit()
+
+            print(
+                f"Execução registrada: "
+                f"{dag_id} | {indicador} | {status}"
+            )
+
+        except Exception as e:
+            conexao.rollback()
+            print(f"Erro ao registrar execução: {e}")
+            raise
+
+        finally:
+            cursor.close()
+            conexao.close()    

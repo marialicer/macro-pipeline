@@ -69,6 +69,10 @@ x-airflow-common:
     AIRFLOW__CORE__MIN_SERIALIZED_DAG_UPDATE_INTERVAL: 5
     AIRFLOW__CORE__MIN_SERIALIZED_DAG_FETCH_INTERVAL: 5
 
+    POSTGRES_PROJETO_USER: ${POSTGRES_PROJETO_USER}
+    POSTGRES_PROJETO_PASSWORD: ${POSTGRES_PROJETO_PASSWORD}
+    POSTGRES_PROJETO_DB: ${POSTGRES_PROJETO_DB}
+
 
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
