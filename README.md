@@ -22,15 +22,15 @@ A **Vesta Capital**, gestora de investimentos, precisa acompanhar continuamente 
 APIs Públicas (BCB / IBGE)
         │
         ▼
- DAG 1 — ingestao_macropipeline     → data/raw/*.json
+ DAG 1 - ingestao_macropipeline     → data/raw/*.json
  (Dynamic Task Mapping)
         │ Dataset: bcb_ingestao
         ▼
- DAG 2 — transformacao_macropipeline → data/processed/*.parquet
+ DAG 2 - transformacao_macropipeline → data/processed/*.parquet
  (Branching + Datasets)
         │ Dataset: bcb_transformacao
         ▼
- DAG 3 — relatorio_macropipeline    → PostgreSQL
+ DAG 3 - relatorio_macropipeline    → PostgreSQL
  (Dynamic Task Mapping + Auditoria)
         │
         ▼
@@ -67,7 +67,7 @@ Período histórico carregado: **janeiro/2020 a dezembro/2024**
 
 ## DAGs
 
-### DAG 1 — `ingestao_macropipeline`
+### DAG 1 - `ingestao_macropipeline`
 - **Schedule:** `@monthly`
 - **Conceitos praticados:** Dynamic Task Mapping, Datasets, XComs
 - **O que faz:** usa `.expand()` para criar automaticamente uma task de extração por indicador (paralelismo automático). Cada task chama a API SGS do BCB e salva o resultado em `data/raw/{indicador}.json`. Ao final, a task `publicar_dataset` atualiza o Dataset `bcb_ingestao`, disparando a DAG 2.
@@ -79,7 +79,7 @@ extrair[cambio]    ──┼──► publicar_dataset ──► (Dataset: bcb_i
 extrair[desemprego]──┘
 ```
 
-### DAG 2 — `transformacao_macropipeline`
+### DAG 2 - `transformacao_macropipeline`
 - **Schedule:** trigada por Dataset `bcb_ingestao`
 - **Conceitos praticados:** Branching, inter-DAG triggering via Dataset
 - **O que faz:** para cada indicador, um `@task.branch` decide qual transformação executar com base na fonte (`BCB` ou `IBGE`). Converte tipos, corrige datas e salva em `data/processed/{indicador}.parquet`. Publica o Dataset `bcb_transformacao` ao final.
@@ -91,7 +91,7 @@ branch_selic →  transformar_bcb_selic (transformar_ibge_selic skipped)
 └──► publicar_dataset ──► (Dataset: bcb_transformacao)
 ```
 
-### DAG 3 — `relatorio_macropipeline`
+### DAG 3 - `relatorio_macropipeline`
 - **Schedule:** trigada por Dataset `bcb_transformacao`
 - **Conceitos praticados:** Dynamic Task Mapping, auditoria de pipeline
 - **O que faz:** carrega os parquets no PostgreSQL via upsert para cada indicador (Dynamic Task Mapping). Ao final, registra a execução na tabela `execucoes_pipeline` para auditoria.
@@ -198,7 +198,7 @@ Abra o Power BI Desktop → Obter Dados → PostgreSQL:
 - **Banco de dados:** valor do `POSTGRES_PROJETO_DB`
 - Importe a tabela `indicadores_macroeconomicos`
 
-> A atualização do dashboard é feita manualmente após cada execução — abra o `.pbix` e clique em **Atualizar**.
+> A atualização do dashboard é feita manualmente após cada execução, abra o `.pbix` e clique em **Atualizar**.
 
 ---
 
@@ -225,18 +225,20 @@ O dashboard da Vesta Capital apresenta:
 - Últimos valores dos indicadores
 - Filtro por fonte e Data (mês e ano)
 
+![Dashboard](<img/dashboard vestacapital.png>)
+
 ---
 
 ## Decisões de Design
 
 **Por que upsert em vez de insert simples?**
-Indicadores como desemprego têm frequência trimestral mas o pipeline roda mensalmente. O `ON CONFLICT DO NOTHING` por `(indicador, data_referencia)` torna a operação idempotente — segura para re-execuções e retries automáticos do Airflow.
+Indicadores como desemprego têm frequência trimestral mas o pipeline roda mensalmente. O `ON CONFLICT DO NOTHING` por `(indicador, data_referencia)` torna a operação idempotente, segura para re-execuções e retries automáticos do Airflow.
 
 **Por que parquet como formato intermediário?**
-Parquet é colunar, comprimido e preserva tipos de dados nativamente — ideal para passar dados entre etapas de um pipeline sem perda de informação de tipo, especialmente datas e decimais.
+Parquet é colunar, comprimido e preserva tipos de dados nativamente, ideal para passar dados entre etapas de um pipeline sem perda de informação de tipo, especialmente datas e decimais.
 
 **Por que separar scripts das DAGs?**
-Mantém as DAGs limpas (somente orquestração) e os scripts testáveis de forma independente — cada módulo em `scripts/` pode ser executado diretamente via `python -m scripts.extract.bcb` para testes locais sem o Airflow.
+Mantém as DAGs limpas (somente orquestração) e os scripts testáveis de forma independente, cada módulo em `scripts/` pode ser executado diretamente via `python -m scripts.extract.bcb` para testes locais sem o Airflow.
 
 **Por que dois bancos PostgreSQL no docker-compose?**
 O banco `postgres` é interno ao Airflow (metadados de DAGs, execuções, logs). O `postgres_projeto` é exclusivo para os dados do projeto, isolando responsabilidades e facilitando conexão direta do Power BI sem interferir no funcionamento do Airflow.
