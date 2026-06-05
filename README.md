@@ -248,11 +248,9 @@ macro-pipeline/
 
 O dashboard da Vesta Capital apresenta:
 
-- Evolução mensal do IPCA e Taxa Selic
-- Comparativo Selic vs IPCA (spread real)
-- Histórico do câmbio USD/BRL
-- Taxa de desemprego trimestral
-- Variação percentual period over period por indicador
+- Evolução mensal média dos indicadores
+- Últimos valores dos indicadores
+- Filtro por fonte e Data (mês e ano)
 
 ---
 
