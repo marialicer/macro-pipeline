@@ -1,10 +1,10 @@
-# 📊 Macro Pipeline — Monitoramento de Indicadores Macroeconômicos
+# Macro Pipeline - Monitoramento de Indicadores Macroeconômicos
 
 > Pipeline de dados automatizado para monitoramento de indicadores macroeconômicos brasileiros, desenvolvido como projeto de portfólio com Apache Airflow, PostgreSQL e Power BI.
 
 ---
 
-## 🏢 Contexto de Negócio
+## Contexto de Negócio
 
 A **Vesta Capital**, gestora de investimentos, precisa acompanhar continuamente a evolução dos principais indicadores macroeconômicos brasileiros para embasar decisões de alocação, hedge e timing de mercado.
 
@@ -16,7 +16,7 @@ A **Vesta Capital**, gestora de investimentos, precisa acompanhar continuamente 
 
 ---
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 ```
 APIs Públicas (BCB / IBGE)
@@ -50,7 +50,7 @@ APIs Públicas (BCB / IBGE)
 
 ---
 
-## 📡 Fontes de Dados
+## Fontes de Dados
 
 Todas as fontes são públicas e gratuitas, sem necessidade de autenticação.
 
@@ -65,7 +65,7 @@ Período histórico carregado: **janeiro/2020 a dezembro/2024**
 
 ---
 
-## 🔄 DAGs
+## DAGs
 
 ### DAG 1 — `ingestao_macropipeline`
 - **Schedule:** `@monthly`
@@ -107,7 +107,7 @@ carregar[desemprego]──┘
 
 ---
 
-## 🗄️ Schema do Banco de Dados
+## Schema do Banco de Dados
 
 ### `indicadores_macroeconomicos`
 | Coluna | Tipo | Descrição |
@@ -136,7 +136,7 @@ Restrição de unicidade: `UNIQUE (indicador, data_referencia)`
 
 ---
 
-## 🚀 Como Executar
+## Como Executar
 
 ### Pré-requisitos
 - Docker Desktop instalado e em execução
@@ -202,34 +202,7 @@ Abra o Power BI Desktop → Obter Dados → PostgreSQL:
 
 ---
 
-## 📁 Estrutura do Projeto
-
-```
-macro-pipeline/
-├── dags/
-│   ├── dag_ingestao.py           # DAG 1 — Extração (Dynamic Task Mapping)
-│   ├── dag_transformacao.py      # DAG 2 — Transformação (Branching)
-│   └── dag_relatorio.py          # DAG 3 — Carga (Dataset trigger + auditoria)
-├── scripts/
-│   ├── extract/
-│   │   └── bcb.py                # Extração da API SGS/BCB
-│   ├── transform/
-│   │   └── bcb.py                # Transformação dos dados BCB
-│   └── load/
-│       └── postgres.py           # Carga no PostgreSQL + auditoria
-├── sql/
-│   └── create_tables.sql         # Schema do banco de dados
-├── data/
-│   ├── raw/                      # JSONs brutos da API (gerado em execução)
-│   └── processed/                # Parquets transformados (gerado em execução)
-├── docker-compose.yaml
-├── .env                          # Não versionado
-└── README.md
-```
-
----
-
-## 🛠️ Stack Tecnológica
+## Stack Tecnológica
 
 | Tecnologia | Versão | Uso |
 |---|---|---|
@@ -244,7 +217,7 @@ macro-pipeline/
 
 ---
 
-## 📈 Dashboard (Power BI)
+## Dashboard (Power BI)
 
 O dashboard da Vesta Capital apresenta:
 
@@ -254,7 +227,7 @@ O dashboard da Vesta Capital apresenta:
 
 ---
 
-## 📝 Decisões de Design
+## Decisões de Design
 
 **Por que upsert em vez de insert simples?**
 Indicadores como desemprego têm frequência trimestral mas o pipeline roda mensalmente. O `ON CONFLICT DO NOTHING` por `(indicador, data_referencia)` torna a operação idempotente — segura para re-execuções e retries automáticos do Airflow.
@@ -270,7 +243,8 @@ O banco `postgres` é interno ao Airflow (metadados de DAGs, execuções, logs).
 
 ---
 
-## 👩‍💻 Autora
+## Autora
 
-**Maria Alice Rocha** — Data Analyst  
-[LinkedIn](#) · [GitHub](https://github.com/marialicer)
+**Maria Alice Rocha** <br>
+Data Analyst e pós-graduada em Analytics e Business Intelligence<br>
+Foco em análise de dados, storytelling, ciência de dados e insights acionáveis
