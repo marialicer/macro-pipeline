@@ -59,7 +59,7 @@ Todas as fontes são públicas e gratuitas, sem necessidade de autenticação.
 | IPCA | API SGS/BCB | 433 | Mensal |
 | Taxa Selic | API SGS/BCB | 432 | Mensal |
 | Câmbio USD/BRL | API SGS/BCB | 1 | Diária → agregada mensalmente |
-| Taxa de Desemprego (PNAD) | API SGS/BCB | 24369 | Trimestral |
+| Taxa de Desemprego (PNAD) | API SGS/BCB | 24369 | Mensal |
 
 Período histórico carregado: **janeiro/2020 a dezembro/2024**
 
